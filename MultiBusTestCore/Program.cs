@@ -27,16 +27,16 @@ namespace MultiBusTest
             {
                 string serverName = "server1";
 
-                busRegistrationConfigurator.SetEndpointNameFormatter(
-                    new KebabCaseEndpointNameFormatter(prefix: serverName, includeNamespace: false)); // this might not be needed as we set endpoint name directly.
+                //busRegistrationConfigurator.SetEndpointNameFormatter(
+                //    new KebabCaseEndpointNameFormatter(prefix: serverName, includeNamespace: false)); // this might not be needed as we set endpoint name directly.
                 busRegistrationConfigurator
                     .AddConsumer<MyMessageConsumer>(cfg =>
                     {
                         cfg.UseConcurrencyLimit(1);
-                    }).Endpoint(c =>
+                    }); /*.Endpoint(c =>
                     {
                         c.Name = $"{serverName}-queue";
-                    });
+                    });*/
                 busRegistrationConfigurator.UsingAmazonSqs((context, sqsBusFactoryConfigurator) =>
                 {
                     sqsBusFactoryConfigurator.Host(region, h =>
@@ -47,7 +47,8 @@ namespace MultiBusTest
                     var nameFormatter = new BusEnvironmentNameFormatter(
                         sqsBusFactoryConfigurator.MessageTopology.EntityNameFormatter, serverName);
                     sqsBusFactoryConfigurator.MessageTopology.SetEntityNameFormatter(nameFormatter);
-                    sqsBusFactoryConfigurator.ConfigureEndpoints(context);
+                    sqsBusFactoryConfigurator.ConfigureEndpoints(context,
+                        new KebabCaseEndpointNameFormatter(prefix: serverName, includeNamespace: false));
                 });
             } );
 
@@ -56,17 +57,17 @@ namespace MultiBusTest
             serviceCollection.AddMassTransit<ISecondBus>(busRegistrationConfigurator =>
             {
                 var server2Name = "server2";
-
-                busRegistrationConfigurator.SetEndpointNameFormatter(
-                    new KebabCaseEndpointNameFormatter(prefix: server2Name, includeNamespace: false)); // this might not be needed as we set endpoint name directly.
+                //busRegistrationConfigurator.SetEndpointNameFormatter(
+                //    new KebabCaseEndpointNameFormatter(prefix: server2Name, includeNamespace: false)); // this might not be needed as we set endpoint name directly.
                 busRegistrationConfigurator
                     .AddConsumer<MyMessageConsumer>(cfg =>
                     {
                         cfg.UseConcurrencyLimit(1);
-                    }).Endpoint(c =>
+                    });/*.Endpoint(c =>
                     {
                         c.Name = $"{server2Name}-queue";
-                    });
+                    });*/
+
                 busRegistrationConfigurator.UsingAmazonSqs((context, sqsBusFactoryConfigurator) =>
                 {
                     sqsBusFactoryConfigurator.Host(region, h =>
@@ -77,7 +78,9 @@ namespace MultiBusTest
                     var nameFormatter = new BusEnvironmentNameFormatter(
                         sqsBusFactoryConfigurator.MessageTopology.EntityNameFormatter, server2Name);
                     sqsBusFactoryConfigurator.MessageTopology.SetEntityNameFormatter(nameFormatter);
-                    sqsBusFactoryConfigurator.ConfigureEndpoints(context);
+                    sqsBusFactoryConfigurator.ConfigureEndpoints(context,
+                        new KebabCaseEndpointNameFormatter(prefix: server2Name, includeNamespace: false)
+                        );
                 });
             });
 
